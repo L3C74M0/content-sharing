@@ -3,6 +3,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views.test_views import Test, TestAuthentication
 from .views.register_user import RegisterView
 from .views.media_content import MediaContentListCreate, MediaContentDetail
+from .views.user_profile import UserProfileList, UserProfileDetail
 
 
 urlpatterns = [
@@ -16,4 +17,7 @@ urlpatterns = [
 
     path('media/', MediaContentListCreate.as_view(), name='media_list_create'),
     path('media/<int:pk>/', MediaContentDetail.as_view(), name='media_detail'),
+
+    path('profiles/', UserProfileList.as_view(), name='profile-list-create'),
+    path('profiles/<int:pk>/', UserProfileDetail.as_view(), name='profile-detail'),
 ]
