@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..models import MediaContent
 from ..serializers.models_serializers import MediaContentSerializer
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
 
 class MediaContentListCreate(APIView):
@@ -61,6 +62,23 @@ class MediaContentListCreate(APIView):
         }, status=status.HTTP_200_OK)
 
 
+    @extend_schema(
+        request=MediaContentSerializer,
+        responses={201: MediaContentSerializer},
+        examples=[
+            OpenApiExample(
+                'Example',
+                description='Example payload',
+                value={
+                    "title": "Launch Trailer",
+                    "description": "New launch trailer for season 2",
+                    "category": "video",
+                    "thumbnail_url": "http://example.com/thumbS2.png",
+                    "content_url": "http://example.com/gameplayS2.mp4"
+                },
+            ),
+        ],
+    )
     def post(self, request):
         serializer = MediaContentSerializer(data=request.data)
         
@@ -95,7 +113,29 @@ class MediaContentDetail(APIView):
         
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+    @extend_schema(
+        request=MediaContentSerializer,
+        responses={
+            200: MediaContentSerializer,
+            404: OpenApiExample(
+                'No encontrado',
+                value={'msg': 'Media not found'},
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                'Update example',
+                description='Example to update media information',
+                value={
+                    "title": "Updated Trailer",
+                    "description": "Updated description for the trailer",
+                    "category": "video",
+                    "thumbnail_url": "http://example.com/newthumb.png",
+                    "content_url": "http://example.com/newgameplay.mp4"
+                },
+            ),
+        ],
+    )
     def put(self, request, pk):
         media = self.get_object(pk)
         

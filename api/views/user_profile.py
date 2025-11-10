@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..models import UserProfile
 from ..serializers.models_serializers import UserProfileSerializer
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
 
 class UserProfileList(APIView):
@@ -73,6 +74,7 @@ class UserProfileDetail(APIView):
         except UserProfile.DoesNotExist:
             return None
 
+
     def get(self, request, pk):
         profile = self.get_object(pk)
         
@@ -83,6 +85,35 @@ class UserProfileDetail(APIView):
         
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+    @extend_schema(
+        request=UserProfileSerializer,
+        responses={
+            200: UserProfileSerializer,
+            404: OpenApiExample(
+                'Profile not found',
+                value={'error': 'Profile not found'},
+            ),
+            400: OpenApiExample(
+                'Invalid data',
+                value={'rating_count': ['A valid integer is required.']},
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                'Profile update example',
+                description='Partial update of an existing user profile.',
+                value={
+                    "rating_count": 5
+                },
+            ),
+        ],
+        description=(
+            "Partially updates a user profile. "
+            "The `user` field should not be modified directly since it is linked to the User model. "
+            "Typically used to update the `rating_count` field."
+        ),
+    )
     def put(self, request, pk):
         profile = self.get_object(pk)
         
@@ -96,6 +127,7 @@ class UserProfileDetail(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def delete(self, request, pk):
         profile = self.get_object(pk)
