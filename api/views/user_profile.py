@@ -11,10 +11,53 @@ class UserProfileList(APIView):
     """
 
     def get(self, request):
-        profiles = UserProfile.objects.all().order_by('-created_at')
+        user_id = request.query_params.get('user_id')
+        username = request.query_params.get('username')
+
+        order_by = request.query_params.get('order_by', '-created_at')
+
+        limit = request.query_params.get('limit')
+        offset = request.query_params.get('offset')
+
+        profiles = UserProfile.objects.select_related('user').all()
+
+        if user_id:
+            profiles = profiles.filter(user_id=user_id)
+        if username:
+            profiles = profiles.filter(user__username__icontains=username)
+
+        profiles = profiles.order_by(order_by)
+
+        total_count = profiles.count()
+
+        if offset:
+            try:
+                offset = int(offset)
+                profiles = profiles[offset:]
+            except ValueError:
+                return Response(
+                    {'error': 'offset must be an integer'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        if limit:
+            try:
+                limit = int(limit)
+                profiles = profiles[:limit]
+            except ValueError:
+                return Response(
+                    {'error': 'limit must be an integer'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         serializer = UserProfileSerializer(profiles, many=True)
-        
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response({
+            'count': total_count,
+            'limit': limit or total_count,
+            'offset': offset or 0,
+            'results': serializer.data
+        }, status=status.HTTP_200_OK)
 
 
 class UserProfileDetail(APIView):
