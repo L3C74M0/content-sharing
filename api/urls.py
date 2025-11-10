@@ -4,6 +4,7 @@ from .views.test_views import Test, TestAuthentication
 from .views.register_user import RegisterView
 from .views.media_content import MediaContentListCreate, MediaContentDetail
 from .views.user_profile import UserProfileList, UserProfileDetail
+from .views.rating import RatingListCreate
 
 
 urlpatterns = [
@@ -18,6 +19,9 @@ urlpatterns = [
     path('media/', MediaContentListCreate.as_view(), name='media_list_create'),
     path('media/<int:pk>/', MediaContentDetail.as_view(), name='media_detail'),
 
-    path('profiles/', UserProfileList.as_view(), name='profile-list-create'),
-    path('profiles/<int:pk>/', UserProfileDetail.as_view(), name='profile-detail'),
+    path('profiles/', UserProfileList.as_view(), name='profile_list'),
+    path('profiles/<int:pk>/', UserProfileDetail.as_view(), name='profile_detail'),
+
+    path('ratings/', RatingListCreate.as_view(), name='rating_list_create'),
+    #path('ratings/<int:pk>/', RatingDetail.as_view(), name='rating_detail'),
 ]

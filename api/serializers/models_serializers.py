@@ -23,9 +23,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class RatingSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    media = MediaContentSerializer(read_only=True)
-
     class Meta:
         model = Rating
         fields = '__all__'
