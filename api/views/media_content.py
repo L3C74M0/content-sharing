@@ -12,10 +12,53 @@ class MediaContentListCreate(APIView):
     """
 
     def get(self, request):
-        media = MediaContent.objects.all().order_by('-created_at')
+        category = request.query_params.get('category')
+        title = request.query_params.get('title')
+
+        order_by = request.query_params.get('order_by', '-created_at')
+
+        limit = request.query_params.get('limit')
+        offset = request.query_params.get('offset')
+
+        media = MediaContent.objects.all()
+
+        if category:
+            media = media.filter(category__iexact=category)
+        if title:
+            media = media.filter(title__icontains=title)
+
+        media = media.order_by(order_by)
+
+        total_count = media.count()
+
+        if offset:
+            try:
+                offset = int(offset)
+                media = media[offset:]
+            except ValueError:
+                return Response(
+                    {'error': 'offset must be an integer'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        if limit:
+            try:
+                limit = int(limit)
+                media = media[:limit]
+            except ValueError:
+                return Response(
+                    {'error': 'limit must be an integer'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         serializer = MediaContentSerializer(media, many=True)
-        
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response({
+            'count': total_count,
+            'limit': limit or total_count,
+            'offset': offset or 0,
+            'results': serializer.data
+        }, status=status.HTTP_200_OK)
 
 
     def post(self, request):
